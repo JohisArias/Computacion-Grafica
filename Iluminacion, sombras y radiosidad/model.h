@@ -41,6 +41,7 @@ public:
     // draws the model, and thus all its meshes
     void Draw(Shader& shader)
     {
+        // toma el shader proporcionado y recorre todas las mallas del modelo para dibujarlas
         for (unsigned int i = 0; i < meshes.size(); i++)
             meshes[i].Draw(shader);
     }
@@ -50,7 +51,7 @@ private:
     void loadModel(string const& path)
     {
         // read file via ASSIMP
-        Assimp::Importer importer;
+        Assimp::Importer importer;          // para importar modelos y texturas
         const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
@@ -81,7 +82,6 @@ private:
         {
             processNode(node->mChildren[i], scene);
         }
-
     }
 
     Mesh processMesh(aiMesh* mesh, const aiScene* scene)
@@ -202,7 +202,7 @@ private:
     }
 };
 
-
+// Carga texturas desde archivos de imagen y crea objetos de textura en OpenGL
 unsigned int TextureFromFile(const char* path, const string& directory, bool gamma)
 {
     string filename = string(path);
