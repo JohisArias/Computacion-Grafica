@@ -91,9 +91,49 @@ int main()
     //o compilacion. En este caso, el modelo no se renderiza completamente bien porque los archivos de jpg a los que se ha configurado apuntar el arhivo mtl
     //no son los correctos para que funcione el renderizado.
 
-
     // draw in wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_POINTS);
+
+    // Creación de datos para el plano
+    float planeVertices[] = {
+        // Posiciones           // Normales         // Coordenadas de textura
+        -3.0f, -0.5f, -3.0f,    0.0f, 1.0f, 0.0f,   0.0f, 0.0f,
+         3.0f, -0.5f, -3.0f,    0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+         3.0f, -0.5f,  3.0f,    0.0f, 1.0f, 0.0f,   1.0f, 1.0f,
+        -3.0f, -0.5f,  3.0f,    0.0f, 1.0f, 0.0f,   0.0f, 1.0f,
+    };
+
+    // Índices para el plano (para dibujar como dos triángulos)
+    unsigned int planeIndices[] = {
+        0, 1, 2,
+        0, 2, 3
+    };
+
+    // Creación del VAO y VBO para el plano
+    unsigned int planeVAO, planeVBO, planeEBO;
+    glGenVertexArrays(1, &planeVAO);
+    glGenBuffers(1, &planeVBO);
+    glGenBuffers(1, &planeEBO);
+
+
+    glBindVertexArray(planeVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, planeEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(planeIndices), planeIndices, GL_STATIC_DRAW);
+
+    // Configuración de atributos de vértices
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    // Fin de configuración de VAO
+    glBindVertexArray(0);
 
     // render loop
     // -----------
@@ -123,13 +163,28 @@ int main()
         ourShader.setMat4("projection", projection);
         ourShader.setMat4("view", view);
 
+        // Configura la textura del objeto
+        ourShader.setBool("useTexture", true);          // Activa la textura
+        ourShader.setInt("texture_diffuse1", 0);
+        
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene (-0.5 due to plane in 'y' position)
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        //model = glm::scale(model, glm::vec3(1.8f)); // Ajusta la escala del objeto a 1.8 veces mas grande
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
+        // Configura el color de la superficie
+        ourShader.setBool("useTexture", false);         // Desactiva la textura
+        ourShader.setVec3("surfaceColor", glm::vec3(0.5f, 0.5f, 0.5f)); // color gris
+
+        // render the plane      
+        glm::mat4 planeModel = glm::mat4(1.0f);
+        ourShader.setMat4("model", planeModel);
+        glBindVertexArray(planeVAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);    //dibuja con triangulos los 6 vertices, empezando desde el vertice con indice 0
+        glBindVertexArray(0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

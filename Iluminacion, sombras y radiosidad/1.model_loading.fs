@@ -4,10 +4,18 @@ out vec4 FragColor;                    // para el color final del fragmento ( co
 
 in vec2 TexCoords;                     // coordenadas de textura interpoladas desde el vertex shader
 
+uniform vec3 surfaceColor;             // para color del piso (superficie)
+uniform bool useTexture;               // usar textura o color solido
+
 uniform sampler2D texture_diffuse1;    // textura de difusión (color) del objeto
 
 void main()
-{   
-	// toma el color de la textura en las coordenadas interpoladas, y lo asigna al fragment
-    FragColor = texture(texture_diffuse1, TexCoords);
+{      
+   if(useTexture){
+        // toma el color de la textura en las coordenadas interpoladas, y lo asigna al fragment
+        FragColor = texture(texture_diffuse1, TexCoords);
+   }
+   else {
+        FragColor = vec4(surfaceColor, 1.0);
+   }
 }
