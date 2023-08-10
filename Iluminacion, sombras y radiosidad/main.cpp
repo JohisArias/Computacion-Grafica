@@ -48,7 +48,7 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Kleber Saavedra deber 5", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Iluminacion, sombras y radiosidad en OBJ importado - Grupo 3", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -111,7 +111,7 @@ int main()
 
         // render
         // ------
-        glClearColor(0.5f, 0.3f, 0.5f, 1.0f);
+        glClearColor(1.0f, 0.87f, 0.68f, 1.0f);   // color de fondo
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // don't forget to enable shader before setting uniforms
