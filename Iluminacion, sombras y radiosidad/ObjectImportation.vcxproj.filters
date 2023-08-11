@@ -45,5 +45,7 @@
   <ItemGroup>
     <None Include="1.model_loading.vs" />
     <None Include="1.model_loading.fs" />
+    <None Include="2.light.vs" />
+    <None Include="2.light.fs" />
   </ItemGroup>
 </Project>

@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+//#include <glm/gtx/sphere.hpp>
 
 #include "shader_m.h"
 #include "camera.h"
@@ -81,6 +82,7 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader ourShader("1.model_loading.vs", "1.model_loading.fs");
+    Shader lightShader("2.light.vs", "2.light.fs");
 
     // load models
     // -----------
@@ -109,12 +111,11 @@ int main()
         0, 2, 3
     };
 
-    // Creación del VAO y VBO para el plano
+    // Creación del VAO, VBO y EBO para el plano
     unsigned int planeVAO, planeVBO, planeEBO;
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
     glGenBuffers(1, &planeEBO);
-
 
     glBindVertexArray(planeVAO);
 
@@ -135,6 +136,68 @@ int main()
     // Fin de configuración de VAO
     glBindVertexArray(0);
 
+    // Datos para el cubo de luz
+    GLfloat lightVertices[] =
+    { //     COORDINATES     //
+        -0.1f, -0.1f,  0.1f,
+        -0.1f, -0.1f, -0.1f,
+         0.1f, -0.1f, -0.1f,
+         0.1f, -0.1f,  0.1f,
+        -0.1f,  0.1f,  0.1f,
+        -0.1f,  0.1f, -0.1f,
+         0.1f,  0.1f, -0.1f,
+         0.1f,  0.1f,  0.1f
+    };
+
+    GLuint lightIndices[] =
+    {
+        0, 1, 2,
+        0, 2, 3,
+        0, 4, 7,
+        0, 7, 3,
+        3, 7, 6,
+        3, 6, 2,
+        2, 6, 5,
+        2, 5, 1,
+        1, 5, 4,
+        1, 4, 0,
+        4, 5, 6,
+        4, 6, 7
+    };
+
+    // Creación del VAO, VBO y EBO para la luz
+    unsigned int lightVAO, lightVBO, lightEBO;
+
+    // Generates Vertex Array Object and binds it
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    
+    glGenBuffers(1, &lightVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lightVertices), lightVertices, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &lightEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(lightIndices), lightIndices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Unbind all to prevent accidentally modifying them
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    // Propiedades de la primera luz
+    glm::vec3 LightPosition1 (-1.0f, 2.0f, -1.0f);
+    glm::vec3 LightColor1(1.0f, 0.5f, 0.5f); // Rosa
+
+    // Propiedades de la segunda luz
+    glm::vec3 LightPosition2(1.0f, 0.3f, 1.5f);
+    glm::vec3 LightColor2(0.5f, 0.8f, 0.8f); // Turquesa
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -154,6 +217,11 @@ int main()
         glClearColor(1.0f, 0.87f, 0.68f, 1.0f);   // color de fondo
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.1f);
+        glm::mat4 lightModel = glm::mat4(1.0f);
+        lightModel = glm::translate(lightModel, lightPos);
+
         // don't forget to enable shader before setting uniforms
         ourShader.use();
 
@@ -170,8 +238,8 @@ int main()
         // render the loaded model
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); // translate it down so it's at the center of the scene (-0.5 due to plane in 'y' position)
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-        //model = glm::scale(model, glm::vec3(1.8f)); // Ajusta la escala del objeto a 1.8 veces mas grande
+        //model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        model = glm::scale(model, glm::vec3(1.8f)); // Ajusta la escala del objeto a 1.8 veces mas grande
         ourShader.setMat4("model", model);
         ourModel.Draw(ourShader);
 
@@ -182,9 +250,38 @@ int main()
         // render the plane      
         glm::mat4 planeModel = glm::mat4(1.0f);
         ourShader.setMat4("model", planeModel);
+        glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(planeModel));
+        glUniform4f(glGetUniformLocation(ourShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+        glUniform3f(glGetUniformLocation(ourShader.ID, "Light1Pos"), lightPos.x, lightPos.y, lightPos.z);
+
         glBindVertexArray(planeVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);    //dibuja con triangulos los 6 vertices, empezando desde el vertice con indice 0
         glBindVertexArray(0);
+
+        // Configurar las propiedades de las luces
+        /*lightShader.use();
+        lightShader.setVec3("Light1Position", LightPosition1);
+        lightShader.setVec3("Light1Color", LightColor2);
+        lightShader.setVec3("Light2Position", LightPosition2);
+        lightShader.setVec3("Light2Color", LightColor2);*/
+
+        // Renderizar las esferas de las luces
+
+        ourShader.use();
+        // Exports the camera Position to the Fragment Shader for specular lighting
+        glUniform3f(glGetUniformLocation(ourShader.ID, "viewPosition"), camera.Position.x, camera.Position.y, camera.Position.z);
+        // Export the camMatrix to the Vertex Shader of the plane
+        glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(projection* view));       
+        glBindVertexArray(planeVAO);            // Bind the VAO so OpenGL knows to use it        
+        glDrawElements(GL_TRIANGLES, sizeof(planeIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+        
+        lightShader.use();
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
+        glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+        // Export the camMatrix to the Vertex Shader of the light cube
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(projection * view));
+        glBindVertexArray(lightVAO);            // Bind the VAO so OpenGL knows to use it
+        glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
