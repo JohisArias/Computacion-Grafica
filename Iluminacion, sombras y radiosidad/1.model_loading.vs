@@ -12,9 +12,6 @@ out vec3 color;
 out vec3 Normal;
 out vec3 crntPos;							// Outputs the current position for the Fragment Shader
 
-out vec3 FragColor;                         // color interpolado para el fragment shader
-out vec3 FragPos;                           // posición interpolada para el fragment shader
-
 // Uniform Matrices
 uniform mat4 model;
 uniform mat4 view;
