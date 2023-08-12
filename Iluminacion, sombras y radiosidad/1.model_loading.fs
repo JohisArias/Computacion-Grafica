@@ -38,7 +38,7 @@ void main()
     float specularLight = 0.50f;
     vec3 viewDirection = normalize(viewPosition - crntPos);
 
-    vec3 resultColor = vec3(0.0);
+    vec3 resultColor;// = vec3(0.0);
 
     for (int i = 0; i < 2; ++i) {
         //vec3 lightDirection = normalize(lights[i].position - FragPos);
@@ -71,7 +71,7 @@ void main()
         specular *= attenuation;
 
         // Sumar las componentes de iluminación al resultado final
-        resultColor += ambient + diffuse + specular;
+        resultColor = ambient + diffuse + specular;
     }
     
     if (useTexture) {     // textura en objeto
