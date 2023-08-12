@@ -19,6 +19,13 @@ uniform vec4 lightColor;               // color of the light from the main funct
 // Luz 1
 uniform vec3 Light1Pos;
 
+struct Light {
+    vec3 position;
+    vec4 color;
+};
+
+uniform Light lights[2]; // Array de luces (Light1 y Light2)
+
 void main()
 {
     // ambient lighting
@@ -26,22 +33,59 @@ void main()
     
     // diffuse lighting
     vec3 normal = normalize(Normal);
-    vec3 lightDirection = normalize(Light1Pos - crntPos);
-    float diffuse = max(dot(normal, lightDirection), 0.0f);
     
     // specular lighting
     float specularLight = 0.50f;
     vec3 viewDirection = normalize(viewPosition - crntPos);
-    vec3 reflectionDirection = reflect(-lightDirection, normal);
-    float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
-    float specular = specAmount * specularLight;
 
-    float phongLighting = ambient + diffuse + specular;
+    vec3 resultColor;// = vec3(0.0);
 
-    if(useTexture){     // textura en objeto
-        FragColor = texture(texture_diffuse1, TexCoords) * lightColor * phongLighting;
-   }
-   else {               // sin textura para piso
-        FragColor = vec4(surfaceColor, 1.0) * lightColor * phongLighting;        
-   }
+    for (int i = 0; i < 2; ++i) {
+        //vec3 lightDirection = normalize(lights[i].position - FragPos);
+        vec3 lightDirection = normalize(lights[i].position - crntPos);
+        float diff = max(dot(normal, lightDirection), 0.0);
+
+        vec3 reflectionDirection = reflect(-lightDirection, normal);
+        //float specular = pow(max(dot(viewDirection, reflectDir), 0.0), 16.0);
+        float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
+        float spec = specAmount * specularLight;
+
+        // Calcular distancia entre el fragmento y la luz
+    //    float distance = length(lights[i].position - FragPos);
+        float distance = length(lights[i].position - crntPos);
+
+        // Calcular atenuación usando coeficientes de atenuación
+        float constant = 1.0;
+        float linear = 0.09;
+        float quadratic = 0.032;
+        float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+
+        // Cálculo de luz ambiental, difusa y especular
+        vec3 ambient = ambient * lights[i].color.rgb;
+        vec3 diffuse = diff * lights[i].color.rgb;
+        vec3 specular = spec * lights[i].color.rgb;
+
+        // Aplicar atenuación a las componentes de iluminación
+        ambient *= attenuation;
+        diffuse *= attenuation;
+        specular *= attenuation;
+
+        // Sumar las componentes de iluminación al resultado final
+        resultColor = ambient + diffuse + specular;
+    }
+    
+    if (useTexture) {     // textura en objeto
+        FragColor = texture(texture_diffuse1, TexCoords) * vec4(resultColor, 1.0);
+    } else {               // sin textura para piso
+        FragColor = vec4(surfaceColor, 1.0) * vec4(resultColor, 1.0);
+    }
+
+   
+
+//    if(useTexture){     // textura en objeto
+//        FragColor = texture(texture_diffuse1, TexCoords) * lightColor * phongLighting;
+//   }
+//   else {               // sin textura para piso
+//        FragColor = vec4(surfaceColor, 1.0) * lightColor * phongLighting;        
+//}
 }

@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-//#include <glm/gtx/sphere.hpp>
 
 #include "shader_m.h"
 #include "camera.h"
@@ -191,12 +190,12 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     // Propiedades de la primera luz
-    glm::vec3 LightPosition1 (-1.0f, 2.0f, -1.0f);
-    glm::vec3 LightColor1(1.0f, 0.5f, 0.5f); // Rosa
+    glm::vec3 LightPosition1 (-0.5f, 0.5f, 0.05f);
+    glm::vec4 LightColor1(1.0f, 1.0f, 0.0f,1.0f); // Rosa
 
     // Propiedades de la segunda luz
-    glm::vec3 LightPosition2(1.0f, 0.3f, 1.5f);
-    glm::vec3 LightColor2(0.5f, 0.8f, 0.8f); // Turquesa
+    glm::vec3 LightPosition2(1.0f,0.08f, 1.0f);
+    glm::vec4 LightColor2(1.0f, 0.0f, 0.0f, 1.0f); // Blanco
 
     // render loop
     // -----------
@@ -207,7 +206,7 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
-
+      
         // input
         // -----
         processInput(window);
@@ -217,10 +216,10 @@ int main()
         glClearColor(1.0f, 0.87f, 0.68f, 1.0f);   // color de fondo
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::vec4 lightColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-        glm::vec3 lightPos = glm::vec3(0.5f, 0.5f, 0.1f);
-        glm::mat4 lightModel = glm::mat4(1.0f);
-        lightModel = glm::translate(lightModel, lightPos);
+        glm::mat4 lightModel1 = glm::mat4(1.0f);
+        lightModel1 = glm::translate(lightModel1, LightPosition1); 
+        glm::mat4 lightModel2 = glm::mat4(1.0f);
+        lightModel2 = glm::translate(lightModel2, LightPosition2);
 
         // don't forget to enable shader before setting uniforms
         ourShader.use();
@@ -251,21 +250,18 @@ int main()
         glm::mat4 planeModel = glm::mat4(1.0f);
         ourShader.setMat4("model", planeModel);
         glUniformMatrix4fv(glGetUniformLocation(ourShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(planeModel));
-        glUniform4f(glGetUniformLocation(ourShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
-        glUniform3f(glGetUniformLocation(ourShader.ID, "Light1Pos"), lightPos.x, lightPos.y, lightPos.z);
-
+        
+        // Primera luz
+        glUniform4f(glGetUniformLocation(ourShader.ID, "lights[0].color"), LightColor1.x, LightColor1.y, LightColor1.z, LightColor1.w);
+        glUniform3f(glGetUniformLocation(ourShader.ID, "lights[0].position"), LightPosition1.x, LightPosition1.y, LightPosition1.z);
+        
+        // Segunda luz
+        glUniform4f(glGetUniformLocation(ourShader.ID, "lights[1].color"), LightColor2.x, LightColor2.y, LightColor2.z, LightColor2.w);
+        glUniform3f(glGetUniformLocation(ourShader.ID, "lights[1].position"), LightPosition2.x, LightPosition2.y, LightPosition2.z);
+        
         glBindVertexArray(planeVAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);    //dibuja con triangulos los 6 vertices, empezando desde el vertice con indice 0
         glBindVertexArray(0);
-
-        // Configurar las propiedades de las luces
-        /*lightShader.use();
-        lightShader.setVec3("Light1Position", LightPosition1);
-        lightShader.setVec3("Light1Color", LightColor2);
-        lightShader.setVec3("Light2Position", LightPosition2);
-        lightShader.setVec3("Light2Color", LightColor2);*/
-
-        // Renderizar las esferas de las luces
 
         ourShader.use();
         // Exports the camera Position to the Fragment Shader for specular lighting
@@ -275,9 +271,20 @@ int main()
         glBindVertexArray(planeVAO);            // Bind the VAO so OpenGL knows to use it        
         glDrawElements(GL_TRIANGLES, sizeof(planeIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
         
+        // Renderizar los cubos (representando los puntos de luz)
         lightShader.use();
-        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel));
-        glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), lightColor.x, lightColor.y, lightColor.z, lightColor.w);
+
+        // Primer cubo luz
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel1));
+        glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), LightColor1.x, LightColor1.y, LightColor1.z, LightColor1.w);
+        // Export the camMatrix to the Vertex Shader of the light cube
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(projection* view));
+        glBindVertexArray(lightVAO);            // Bind the VAO so OpenGL knows to use it
+        glDrawElements(GL_TRIANGLES, sizeof(lightIndices) / sizeof(int), GL_UNSIGNED_INT, 0);
+
+        // Segundo cubo luz
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(lightModel2));
+        glUniform4f(glGetUniformLocation(lightShader.ID, "lightColor"), LightColor2.x, LightColor2.y, LightColor2.z, LightColor2.w);
         // Export the camMatrix to the Vertex Shader of the light cube
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "camMatrix"), 1, GL_FALSE, glm::value_ptr(projection * view));
         glBindVertexArray(lightVAO);            // Bind the VAO so OpenGL knows to use it
