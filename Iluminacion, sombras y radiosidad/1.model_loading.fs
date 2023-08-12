@@ -3,6 +3,7 @@
 out vec4 FragColor;                    // para el color final del fragmento ( color de un píxel en la pantalla)
 
 in vec2 TexCoords;                     // coordenadas de textura interpoladas desde el vertex shader
+in vec3 FragPos;
 in vec3 Normal;
 in vec3 color;
 in vec3 crntPos;
@@ -13,6 +14,10 @@ uniform bool useTexture;               // usar textura o color solido
 uniform sampler2D texture_diffuse1;    // textura de difusión (color) del objeto
 
 uniform vec3 viewPosition;             // posicion de camara
+
+uniform vec4 lightColor;               // color of the light from the main function
+// Luz 1
+uniform vec3 Light1Pos;
 
 struct Light {
     vec3 position;
@@ -36,16 +41,17 @@ void main()
     vec3 resultColor = vec3(0.0);
 
     for (int i = 0; i < 2; ++i) {
-        // diffuse lighting
+        //vec3 lightDirection = normalize(lights[i].position - FragPos);
         vec3 lightDirection = normalize(lights[i].position - crntPos);
         float diff = max(dot(normal, lightDirection), 0.0);
 
-        // specular lighting
         vec3 reflectionDirection = reflect(-lightDirection, normal);
+        //float specular = pow(max(dot(viewDirection, reflectDir), 0.0), 16.0);
         float specAmount = pow(max(dot(viewDirection, reflectionDirection), 0.0f), 8);
         float spec = specAmount * specularLight;
 
         // Calcular distancia entre el fragmento y la luz
+    //    float distance = length(lights[i].position - FragPos);
         float distance = length(lights[i].position - crntPos);
 
         // Calcular atenuación usando coeficientes de atenuación
@@ -73,4 +79,13 @@ void main()
     } else {               // sin textura para piso
         FragColor = vec4(surfaceColor, 1.0) * vec4(resultColor, 1.0);
     }
+
+   
+
+//    if(useTexture){     // textura en objeto
+//        FragColor = texture(texture_diffuse1, TexCoords) * lightColor * phongLighting;
+//   }
+//   else {               // sin textura para piso
+//        FragColor = vec4(surfaceColor, 1.0) * lightColor * phongLighting;        
+//}
 }
