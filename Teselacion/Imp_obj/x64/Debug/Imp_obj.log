@@ -1,0 +1,14 @@
+﻿  main.cpp
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(128,16): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'unsigned __int64'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(128,16): message : consider using '%zd' in the format string
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(129,16): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'unsigned __int64'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(129,16): message : consider using '%zd' in the format string
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(130,16): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'unsigned __int64'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(130,16): message : consider using '%zd' in the format string
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(131,16): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 1 has type 'unsigned __int64'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(131,16): message : consider using '%zd' in the format string
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(200,20): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(207,22): warning C4305: '-=': truncation from 'double' to 'float'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(214,20): warning C4305: '+=': truncation from 'double' to 'float'
+C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\Imp_obj\main.cpp(221,22): warning C4305: '+=': truncation from 'double' to 'float'
+  Imp_obj.vcxproj -> C:\Users\sebas\OneDrive\Documents\ESCUELA POLITECNICA NACIONAL\5. Quinto Semestre\Computacion Grafica\Deberes\Imp_obj\x64\Debug\Imp_obj.exe
