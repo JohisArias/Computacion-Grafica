@@ -19,6 +19,7 @@ float objectPositionX = 0.0f;
 float objectPositionY = 0.0f;
 float objectRotationX = 0.0f;
 float objectRotationY = 0.0f;
+
 int prevMouseX = 0;
 int prevMouseY = 0;
 bool mousePressed = false;
@@ -179,20 +180,54 @@ void init() {
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
 
-    model.load("C:/Users/sebas/OneDrive/Documents/ESCUELA POLITECNICA NACIONAL/5. Quinto Semestre/Computacion Grafica/Deberes/Imp_obj/Imp_obj/Lowpoly_Fox.obj");
+   model.load("../Imp_obj/Lowpoly_Fox.obj");
+    //model.load("../Imp_obj/pard.obj"); modelo que también funciona
 }
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-    glTranslatef(objectPositionX + posx, objectPositionY, -cameraDistance); // Aquí usamos posx
+
+    // Configuración de la cámara y rotación del objeto
+    glTranslatef(objectPositionX + posx, objectPositionY, -cameraDistance);
     glRotatef(objectRotationY, 1.0f, 0.0f, 0.0f);
     glRotatef(objectRotationX, 0.0f, 1.0f, 0.0f);
 
-    model.draw(1); // Renderizar el objeto con la teselación deseada
+    // Renderizar el primer objeto con la teselación deseada
+    model.draw(1);
+
+    // Configurar la proyección de la sombra
+    GLfloat light_pos[] = { -1.0f, 10.0f, 100.0f, 1.0f };
+    GLdouble ground_plane[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glColor4f(0.0f, 0.0f, 0.0f, 0.5f);
+    glPushMatrix();
+    glTranslatef(light_pos[0], light_pos[1], light_pos[2]);
+    glClipPlane(GL_CLIP_PLANE0, ground_plane);
+    glEnable(GL_CLIP_PLANE0);
+    glTranslatef(0.05f, -10.01f, -130.0f);
+    glScalef(1.0f, 0.0f, 1.0f);
+
+    // Renderizar el primer objeto nuevamente para la sombra
+    model.draw(1);
+
+    glDisable(GL_CLIP_PLANE0);
+    glPopMatrix();
+    glEnable(GL_LIGHTING);
+    glEnable(GL_TEXTURE_2D);
+
+    // Cambiar el modo de representación de polígonos a líneas y configurar el sombreado
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glShadeModel(GL_FLAT);
+
+    // Renderizar el primer objeto con una menor teselación
+    model.draw(1);
 
     glutSwapBuffers();
 }
+
+
 
 void spinDisplayIzq() {
     if (ismouse)
@@ -300,7 +335,8 @@ int main(int argc, char** argv) {
     glutSpecialFunc(keyDown);
 	glutSpecialUpFunc(keyUp);
 	glutMouseFunc(mouse);
-    glutDisplayFunc(display); // Solo una llamada a glutDisplayFunc()
+    glutDisplayFunc(display); 
+
 
     glEnable(GL_DEPTH_TEST);
     glutMainLoop();
